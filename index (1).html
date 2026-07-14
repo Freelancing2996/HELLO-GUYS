@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Elias Vance — Architectural Draft Engineer</title>
+<meta name="description" content="Elias Vance, Architectural Draft Engineer — construction documentation, structural detailing, and BIM coordination.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --blue-deep:#0A1E33;
+    --blue:#0F2A43;
+    --blue-mid:#173B5C;
+    --cyan:#6FD6E0;
+    --cyan-dim:#3E8B94;
+    --paper:#F1EEE4;
+    --paper-2:#E8E4D6;
+    --ink:#1C2024;
+    --ink-soft:#4B5158;
+    --line-grey:#9AA0A6;
+    --redline:#D9542E;
+    --redline-dark:#B23F20;
+    --radius:2px;
+    --display:'Space Grotesk',sans-serif;
+    --mono:'IBM Plex Mono',monospace;
+    --body:'Inter',sans-serif;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+
+  html{scroll-behavior:smooth;}
+
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *{animation-duration:0.01ms !important;animation-iteration-count:1 !important;transition-duration:0.01ms !important;}
+  }
+
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:var(--body);
+    line-height:1.6;
+    overflow-x:hidden;
+  }
+
+  ::selection{background:var(--redline);color:#fff;}
+
+  a{color:inherit;text-decoration:none;}
+
+  img,svg{display:block;max-width:100%;}
+
+  .wrap{
+    max-width:1180px;
+    margin:0 auto;
+    padding:0 40px;
+  }
+
+  .eyebrow{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+
+  .eyebrow::before{
+    content:"";
+    width:22px;
+    height:1px;
+    background:currentColor;
+    opacity:.6;
+  }
+
+  .on-dark .eyebrow{color:var(--cyan);}
+  .on-light .eyebrow{color:var(--redline-dark);}
+
+  h1,h2,h3{
+    font-family:var(--display);
+    font-weight:600;
+    letter-spacing:-.01em;
+  }
+
+  /* ---------- sheet frame (corner registration marks) ---------- */
+  .sheet{
+    position:relative;
+    padding:110px 0 120px;
+  }
+  .sheet::before,.sheet::after,
+  .sheet .crop-tl,.sheet .crop-br{
+    content:"";
+    position:absolute;
+    width:26px;
+    height:26px;
+    pointer-events:none;
+  }
+  .sheet::before{ /* top-left */
+    top:36px;left:24px;
+    border-top:1px solid currentColor;
+    border-left:1px solid currentColor;
+    opacity:.35;
+  }
+  .sheet::after{ /* bottom-right */
+    bottom:36px;right:24px;
+    border-bottom:1px solid currentColor;
+    border-right:1px solid currentColor;
+    opacity:.35;
+  }
+  .on-dark.sheet{color:var(--cyan);}
+  .on-light.sheet{color:var(--ink-soft);}
+
+  .sheet-tag{
+    position:absolute;
+    top:44px;
+    right:40px;
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.12em;
+    opacity:.5;
+  }
+
+  /* ---------- nav ---------- */
+  header{
+    position:fixed;
+    top:0;left:0;right:0;
+    z-index:100;
+    background:rgba(10,30,51,.92);
+    backdrop-filter:blur(6px);
+    border-bottom:1px solid rgba(111,214,224,.18);
+  }
+  .nav-inner{
+    max-width:1180px;
+    margin:0 auto;
+    padding:0 40px;
+    height:64px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:#fff;
+    font-family:var(--display);
+    font-weight:600;
+    font-size:15px;
+    letter-spacing:.01em;
+  }
+  .brand small{
+    display:block;
+    font-family:var(--mono);
+    font-weight:400;
+    font-size:10px;
+    letter-spacing:.1em;
+    color:var(--cyan);
+    text-transform:uppercase;
+  }
+  nav ul{
+    list-style:none;
+    display:flex;
+    gap:2px;
+  }
+  nav a{
+    display:block;
+    padding:10px 16px;
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:#c9d3da;
+    border-bottom:2px solid transparent;
+    transition:color .2s ease, border-color .2s ease;
+  }
+  nav a:hover{color:#fff;border-color:var(--cyan);}
+  .nav-cta{
+    display:none;
+  }
+  #nav-toggle{display:none;}
+  .burger{
+    display:none;
+    width:34px;height:34px;
+    border:1px solid rgba(111,214,224,.4);
+    color:#fff;
+    align-items:center;justify-content:center;
+    cursor:pointer;
+  }
+
+  @media (max-width:860px){
+    nav ul{
+      position:fixed;
+      top:64px;left:0;right:0;
+      flex-direction:column;
+      background:var(--blue-deep);
+      gap:0;
+      padding:8px 24px 20px;
+      transform:translateY(-8px);
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .2s ease, transform .2s ease;
+      border-bottom:1px solid rgba(111,214,224,.18);
+    }
+    #nav-toggle:checked ~ ul{
+      opacity:1;
+      transform:translateY(0);
+      pointer-events:auto;
+    }
+    nav a{padding:12px 4px;border-bottom:1px solid rgba(255,255,255,.06);}
+    .burger{display:flex;}
+  }
+
+  /* ---------- hero ---------- */
+  .hero{
+    position:relative;
+    min-height:100vh;
+    background:
+      radial-gradient(ellipse at 82% 8%, rgba(111,214,224,.10), transparent 55%),
+      linear-gradient(180deg, var(--blue) 0%, var(--blue-deep) 100%);
+    color:#fff;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    padding-top:64px;
+    overflow:hidden;
+  }
+  .hero-grid{
+    position:absolute;inset:0;
+    background-image:
+      linear-gradient(rgba(111,214,224,.09) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(111,214,224,.09) 1px, transparent 1px);
+    background-size:44px 44px;
+    mask-image:radial-gradient(ellipse at 60% 35%, black 5%, transparent 72%);
+    pointer-events:none;
+  }
+  .coord-readout{
+    position:absolute;
+    top:84px;right:40px;
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--cyan);
+    letter-spacing:.04em;
+    text-align:right;
+    opacity:.85;
+    pointer-events:none;
+  }
+  .coord-readout span{display:inline-block;min-width:56px;}
+  .crosshair{
+    position:absolute;
+    width:18px;height:18px;
+    pointer-events:none;
+    transform:translate(-50%,-50%);
+    opacity:0;
+    transition:opacity .2s ease;
+  }
+  .crosshair::before,.crosshair::after{
+    content:"";
+    position:absolute;
+    background:var(--cyan);
+  }
+  .crosshair::before{top:8px;left:0;width:18px;height:1px;}
+  .crosshair::after{left:8px;top:0;width:1px;height:18px;}
+
+  .hero-content{
+    position:relative;
+    z-index:2;
+    max-width:1180px;
+    margin:0 auto;
+    padding:0 40px;
+    width:100%;
+  }
+  .hero-content .eyebrow{color:var(--cyan);margin-bottom:26px;}
+  .hero h1{
+    font-size:clamp(2.6rem, 6vw, 5rem);
+    line-height:1.03;
+    max-width:14ch;
+  }
+  .hero h1 em{
+    font-style:normal;
+    color:var(--cyan);
+  }
+  .hero p.lede{
+    margin-top:28px;
+    max-width:52ch;
+    font-size:clamp(1rem, 1.6vw, 1.15rem);
+    color:#c9d3da;
+  }
+  .cta-row{
+    margin-top:44px;
+    display:flex;
+    gap:16px;
+    flex-wrap:wrap;
+  }
+  .btn{
+    font-family:var(--mono);
+    font-size:13px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    padding:15px 26px;
+    border:1px solid transparent;
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    cursor:pointer;
+    background:none;
+    transition:transform .15s ease, background .2s ease, color .2s ease, border-color .2s ease;
+  }
+  .btn:hover{transform:translateY(-1px);}
+  .btn--fill{
+    background:var(--redline);
+    color:#fff;
+  }
+  .btn--fill:hover{background:var(--redline-dark);}
+  .btn--ghost-dark{
+    border-color:rgba(111,214,224,.5);
+    color:#fff;
+  }
+  .btn--ghost-dark:hover{background:rgba(111,214,224,.08);border-color:var(--cyan);}
+  .btn--ghost-light{
+    border-color:rgba(28,32,36,.3);
+    color:var(--ink);
+  }
+  .btn--ghost-light:hover{background:rgba(28,32,36,.05);}
+
+  /* title block */
+  .titleblock{
+    position:relative;
+    z-index:2;
+    border-top:1px solid rgba(111,214,224,.25);
+    margin-top:70px;
+  }
+  .titleblock-inner{
+    max-width:1180px;
+    margin:0 auto;
+    padding:0 40px;
+    display:grid;
+    grid-template-columns:repeat(5,1fr);
+  }
+  .tb-cell{
+    padding:16px 18px;
+    border-right:1px solid rgba(111,214,224,.18);
+    font-family:var(--mono);
+  }
+  .tb-cell:last-child{border-right:none;}
+  .tb-cell span{
+    display:block;
+    font-size:10px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--cyan-dim);
+    margin-bottom:6px;
+  }
+  .tb-cell strong{
+    font-size:13px;
+    font-weight:500;
+    color:#f2f5f6;
+  }
+  @media (max-width:860px){
+    .titleblock-inner{grid-template-columns:repeat(2,1fr);}
+    .tb-cell{border-bottom:1px solid rgba(111,214,224,.18);}
+  }
+
+  /* ---------- dimension divider ---------- */
+  .dim-divider{
+    width:100%;
+    height:46px;
+    display:block;
+  }
+  .on-dark .dim-divider line, .on-dark .dim-divider path{stroke:var(--cyan);}
+  .on-light .dim-divider line, .on-light .dim-divider path{stroke:var(--ink-soft);}
+  .dim-divider text{
+    font-family:var(--mono);
+    font-size:10px;
+    letter-spacing:.08em;
+    fill:currentColor;
+  }
+  .on-dark .dim-divider text{fill:var(--cyan);}
+  .on-light .dim-divider text{fill:var(--ink-soft);}
+
+  /* ---------- sections generic ---------- */
+  .on-light{background:var(--paper);color:var(--ink);}
+  .on-dark{background:var(--blue-deep);color:#fff;}
+
+  .section-head{
+    max-width:640px;
+    margin-bottom:56px;
+  }
+  .section-head h2{
+    margin-top:16px;
+    font-size:clamp(1.9rem, 3.4vw, 2.7rem);
+    line-height:1.12;
+  }
+  .section-head p{
+    margin-top:18px;
+    font-size:1.05rem;
+    max-width:52ch;
+  }
+  .on-dark .section-head p{color:#b9c3ca;}
+  .on-light .section-head p{color:var(--ink-soft);}
+
+  /* reveal on scroll */
+  .reveal{
+    opacity:0;
+    transform:translateY(18px);
+    transition:opacity .6s ease, transform .6s ease;
+  }
+  .reveal.is-visible{opacity:1;transform:translateY(0);}
+
+  /* ---------- profile ---------- */
+  .profile-grid{
+    display:grid;
+    grid-template-columns:1.1fr .9fr;
+    gap:64px;
+    align-items:start;
+  }
+  .profile-grid p{
+    color:var(--ink-soft);
+    margin-bottom:16px;
+    max-width:56ch;
+  }
+  .stat-list{
+    border-top:1px solid rgba(28,32,36,.15);
+  }
+  .stat-row{
+    display:flex;
+    justify-content:space-between;
+    align-items:baseline;
+    padding:18px 0;
+    border-bottom:1px solid rgba(28,32,36,.15);
+  }
+  .stat-row .num{
+    font-family:var(--display);
+    font-size:1.8rem;
+    font-weight:600;
+    color:var(--redline-dark);
+  }
+  .stat-row .label{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    text-align:right;
+  }
+  @media (max-width:860px){
+    .profile-grid{grid-template-columns:1fr;}
+  }
+
+  /* ---------- services ---------- */
+  .spec-list{
+    border-top:1px solid rgba(111,214,224,.2);
+  }
+  .spec-item{
+    display:grid;
+    grid-template-columns:70px 1fr;
+    gap:24px;
+    padding:26px 0;
+    border-bottom:1px solid rgba(111,214,224,.2);
+  }
+  .spec-item .code{
+    font-family:var(--mono);
+    color:var(--cyan);
+    font-size:13px;
+    letter-spacing:.05em;
+    padding-top:3px;
+  }
+  .spec-item h3{
+    font-size:1.15rem;
+    font-weight:600;
+    margin-bottom:6px;
+  }
+  .spec-item p{
+    color:#b9c3ca;
+    font-size:.97rem;
+    max-width:56ch;
+  }
+
+  /* ---------- tools legend ---------- */
+  .legend-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:0 48px;
+    border-top:1px solid rgba(28,32,36,.15);
+  }
+  .legend-item{
+    display:flex;
+    align-items:center;
+    gap:16px;
+    padding:20px 0;
+    border-bottom:1px solid rgba(28,32,36,.15);
+  }
+  .legend-swatch{
+    flex:none;
+    width:34px;height:34px;
+    border:1px solid var(--ink);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .legend-body{flex:1;min-width:0;}
+  .legend-top{
+    display:flex;
+    justify-content:space-between;
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin-bottom:8px;
+  }
+  .legend-name{
+    font-family:var(--display);
+    font-weight:600;
+    font-size:1rem;
+    color:var(--ink);
+  }
+  .bar-track{
+    height:4px;
+    background:rgba(28,32,36,.12);
+    width:100%;
+  }
+  .bar-fill{height:4px;background:var(--redline);}
+  @media (max-width:860px){
+    .legend-grid{grid-template-columns:1fr;}
+  }
+
+  /* ---------- work grid ---------- */
+  .work-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:2px;
+    background:rgba(28,32,36,.15);
+    border:1px solid rgba(28,32,36,.15);
+  }
+  .work-card{
+    background:var(--paper);
+    padding:28px 28px 30px;
+    position:relative;
+    transition:background .25s ease;
+  }
+  .work-card:hover{background:var(--paper-2);}
+  .work-thumb{
+    width:100%;
+    height:150px;
+    background:var(--blue-deep);
+    margin-bottom:20px;
+    overflow:hidden;
+    position:relative;
+  }
+  .work-thumb svg{width:100%;height:100%;}
+  .work-thumb svg path,.work-thumb svg line,.work-thumb svg rect,.work-thumb svg circle{
+    stroke-dasharray:600;
+    stroke-dashoffset:600;
+    transition:stroke-dashoffset 1.1s ease;
+  }
+  .work-card:hover .work-thumb svg path,
+  .work-card:hover .work-thumb svg line,
+  .work-card:hover .work-thumb svg rect,
+  .work-card:hover .work-thumb svg circle{
+    stroke-dashoffset:0;
+  }
+  .work-top{
+    display:flex;
+    justify-content:space-between;
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    color:var(--redline-dark);
+    margin-bottom:10px;
+  }
+  .work-card h3{
+    font-size:1.2rem;
+    margin-bottom:8px;
+  }
+  .work-card p{
+    color:var(--ink-soft);
+    font-size:.94rem;
+    margin-bottom:14px;
+  }
+  .work-scale{
+    font-family:var(--mono);
+    font-size:11px;
+    color:var(--ink-soft);
+    border-top:1px solid rgba(28,32,36,.15);
+    padding-top:12px;
+  }
+  @media (max-width:720px){
+    .work-grid{grid-template-columns:1fr;}
+  }
+
+  /* ---------- process ---------- */
+  .process-list{counter-reset:step;}
+  .process-item{
+    display:grid;
+    grid-template-columns:80px 1fr;
+    gap:24px;
+    padding:30px 0;
+    border-bottom:1px solid rgba(111,214,224,.2);
+  }
+  .process-item:first-child{border-top:1px solid rgba(111,214,224,.2);}
+  .process-num{
+    font-family:var(--display);
+    font-size:2rem;
+    font-weight:700;
+    color:var(--cyan);
+    opacity:.85;
+  }
+  .process-item h3{font-size:1.15rem;margin-bottom:8px;}
+  .process-item p{color:#b9c3ca;max-width:58ch;font-size:.97rem;}
+
+  /* ---------- notes / testimonials ---------- */
+  .notes-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:28px;
+  }
+  .note-card{
+    background:#fff;
+    border:1px solid rgba(28,32,36,.14);
+    border-left:3px solid var(--redline);
+    padding:26px 24px;
+    position:relative;
+  }
+  .note-card .mark{
+    font-family:var(--mono);
+    font-size:10px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--redline-dark);
+    display:block;
+    margin-bottom:14px;
+  }
+  .note-card p.quote{
+    font-family:var(--display);
+    font-size:1.02rem;
+    line-height:1.5;
+    margin-bottom:20px;
+  }
+  .note-card .attr{
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:var(--ink-soft);
+    letter-spacing:.02em;
+  }
+  @media (max-width:900px){
+    .notes-grid{grid-template-columns:1fr;}
+  }
+
+  /* ---------- contact ---------- */
+  .contact-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:70px;
+  }
+  .contact-info p{color:#b9c3ca;max-width:44ch;margin-bottom:28px;}
+  .info-row{
+    display:flex;
+    justify-content:space-between;
+    padding:14px 0;
+    border-bottom:1px solid rgba(111,214,224,.2);
+    font-family:var(--mono);
+    font-size:13px;
+  }
+  .info-row span:first-child{color:var(--cyan-dim);text-transform:uppercase;letter-spacing:.06em;font-size:11px;}
+  .info-row span:last-child{color:#fff;}
+
+  .stamp{
+    margin-top:36px;
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
+    border:1.5px solid var(--redline);
+    color:var(--redline);
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    padding:8px 14px;
+    transform:rotate(-3deg);
+  }
+
+  form{
+    background:rgba(255,255,255,.03);
+    border:1px solid rgba(111,214,224,.22);
+    padding:32px;
+  }
+  .field{margin-bottom:22px;}
+  .field label{
+    display:block;
+    font-family:var(--mono);
+    font-size:10.5px;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color:var(--cyan-dim);
+    margin-bottom:10px;
+  }
+  .field input, .field select, .field textarea{
+    width:100%;
+    background:transparent;
+    border:none;
+    border-bottom:1px solid rgba(111,214,224,.35);
+    color:#fff;
+    font-family:var(--body);
+    font-size:15px;
+    padding:10px 2px;
+    outline:none;
+    transition:border-color .2s ease;
+  }
+  .field select option{color:#111;}
+  .field input:focus, .field select:focus, .field textarea:focus{
+    border-color:var(--cyan);
+  }
+  .field textarea{resize:vertical;min-height:90px;}
+  form .btn{width:100%;justify-content:center;margin-top:6px;}
+  .form-note{
+    margin-top:16px;
+    font-size:12px;
+    color:#8fa0aa;
+    font-family:var(--mono);
+  }
+  @media (max-width:860px){
+    .contact-grid{grid-template-columns:1fr;gap:48px;}
+  }
+
+  /* ---------- footer ---------- */
+  footer{
+    background:var(--blue-deep);
+    color:#8ea0aa;
+    padding:56px 0 32px;
+    border-top:1px solid rgba(111,214,224,.16);
+  }
+  .footer-top{
+    display:flex;
+    justify-content:space-between;
+    gap:40px;
+    flex-wrap:wrap;
+    margin-bottom:40px;
+  }
+  .sheet-index{
+    list-style:none;
+    display:grid;
+    grid-template-columns:repeat(2,auto);
+    gap:8px 32px;
+    font-family:var(--mono);
+    font-size:12px;
+  }
+  .sheet-index a{color:#b9c3ca;transition:color .2s ease;}
+  .sheet-index a:hover{color:var(--cyan);}
+  .sheet-index li span{color:var(--cyan-dim);margin-right:8px;}
+  .footer-bottom{
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:12px;
+    padding-top:24px;
+    border-top:1px solid rgba(111,214,224,.14);
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.03em;
+  }
+
+  @media (max-width:640px){
+    .wrap{padding:0 22px;}
+    .hero-content{padding:0 22px;}
+    .titleblock-inner{padding:0 22px;}
+    .sheet{padding:80px 0 90px;}
+    .coord-readout{display:none;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="nav-inner">
+    <a href="#cover" class="brand">
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+        <circle cx="13" cy="13" r="10.5" stroke="#6FD6E0" stroke-width="1.2"/>
+        <line x1="13" y1="3.5" x2="13" y2="8.5" stroke="#6FD6E0" stroke-width="1.2"/>
+        <line x1="13" y1="17.5" x2="13" y2="22.5" stroke="#6FD6E0" stroke-width="1.2"/>
+        <circle cx="13" cy="13" r="2" fill="#6FD6E0"/>
+      </svg>
+      <span>Elias Vance<small>Architectural Draft Engineer</small></span>
+    </a>
+    <input type="checkbox" id="nav-toggle">
+    <nav>
+      <ul>
+        <li><a href="#profile">Profile</a></li>
+        <li><a href="#services">Services</a></li>
+        <li><a href="#tools">Tools</a></li>
+        <li><a href="#work">Work</a></li>
+        <li><a href="#process">Process</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </nav>
+    <label for="nav-toggle" class="burger" aria-label="Toggle menu">
+      <svg width="16" height="12" viewBox="0 0 16 12" fill="none" aria-hidden="true"><line x1="0" y1="1" x2="16" y2="1" stroke="currentColor"/><line x1="0" y1="6" x2="16" y2="6" stroke="currentColor"/><line x1="0" y1="11" x2="16" y2="11" stroke="currentColor"/></svg>
+    </label>
+  </div>
+</header>
+
+<section class="hero" id="cover">
+  <div class="hero-grid" aria-hidden="true"></div>
+  <div class="coord-readout" id="coordReadout" aria-hidden="true">X:<span id="cx">000.0</span><br>Y:<span id="cy">000.0</span></div>
+  <div class="crosshair" id="crosshair" aria-hidden="true"></div>
+
+  <div class="hero-content">
+    <p class="eyebrow">Sheet A&#8211;000 &mdash; Cover</p>
+    <h1>Precision drafted.<br><em>Structurally sound.</em></h1>
+    <p class="lede">Elias Vance turns design intent into buildable construction documents &mdash; coordinated sheets, checked dimensions, and detail drawings that hold up in the field, not just on screen.</p>
+    <div class="cta-row">
+      <a href="#work" class="btn btn--fill">View Selected Work</a>
+      <a href="#contact" class="btn btn--ghost-dark">Request a Submittal</a>
+    </div>
+  </div>
+
+  <div class="titleblock">
+    <div class="titleblock-inner">
+      <div class="tb-cell"><span>Project</span><strong>Portfolio Set 2026</strong></div>
+      <div class="tb-cell"><span>Drawn</span><strong>E. Vance</strong></div>
+      <div class="tb-cell"><span>Checked</span><strong>&mdash;</strong></div>
+      <div class="tb-cell"><span>Scale</span><strong>N.T.S.</strong></div>
+      <div class="tb-cell"><span>Sheet</span><strong>A&#8211;000 / REV 03</strong></div>
+    </div>
+  </div>
+</section>
+
+<svg class="dim-divider on-light" viewBox="0 0 1180 46" preserveAspectRatio="none" aria-hidden="true">
+  <line x1="20" y1="23" x2="1160" y2="23" stroke-width="1"/>
+  <line x1="20" y1="14" x2="20" y2="32" stroke-width="1"/>
+  <line x1="1160" y1="14" x2="1160" y2="32" stroke-width="1"/>
+  <text x="590" y="18" text-anchor="middle">PROFILE &mdash; SHEET A&#8211;001</text>
+</svg>
+
+<section class="sheet on-light" id="profile">
+  <span class="sheet-tag">A&#8211;001</span>
+  <div class="wrap reveal">
+    <div class="profile-grid">
+      <div>
+        <p class="eyebrow">Sheet A&#8211;001 &mdash; Profile</p>
+        <h2 style="margin-top:16px;">Twelve years at the drafting table.</h2>
+        <p style="margin-top:22px;">Elias Vance is an independent architectural draft engineer producing construction documentation, structural detailing, and BIM coordination for architecture firms, structural engineers, and general contractors across residential, commercial, and civil work.</p>
+        <p>Trained on the board before moving fully digital, every set still gets a hand-scale check before it goes out the door &mdash; because a drawing that reads clean on screen can still be wrong at 1/4" = 1'-0".</p>
+        <p>Fluent in the handoff between design intent and buildable detail: reading redlines, resolving clashes, and keeping revision sets tight through permit and RFI cycles.</p>
+      </div>
+      <div class="stat-list">
+        <div class="stat-row"><span class="num">12</span><span class="label">Years in<br>practice</span></div>
+        <div class="stat-row"><span class="num">340+</span><span class="label">Sheet sets<br>delivered</span></div>
+        <div class="stat-row"><span class="num">28</span><span class="label">Firms<br>served</span></div>
+        <div class="stat-row"><span class="num">0</span><span class="label">Missed permit<br>deadlines</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<svg class="dim-divider on-dark" viewBox="0 0 1180 46" preserveAspectRatio="none" aria-hidden="true">
+  <line x1="20" y1="23" x2="1160" y2="23" stroke-width="1"/>
+  <line x1="20" y1="14" x2="20" y2="32" stroke-width="1"/>
+  <line x1="1160" y1="14" x2="1160" y2="32" stroke-width="1"/>
+  <text x="590" y="18" text-anchor="middle">SCOPE OF SERVICES &mdash; SHEET A&#8211;002</text>
+</svg>
+
+<section class="sheet on-dark" id="services" style="background:var(--blue);">
+  <span class="sheet-tag">A&#8211;002</span>
+  <div class="wrap reveal">
+    <div class="section-head">
+      <p class="eyebrow">Sheet A&#8211;002 &mdash; Scope</p>
+      <h2>Where the work happens.</h2>
+      <p>Six areas of scope, drafted from concept sketch or field markup through to an issued, coordinated sheet set.</p>
+    </div>
+    <div class="spec-list">
+      <div class="spec-item">
+        <span class="code">01</span>
+        <div><h3>Construction Documentation</h3><p>Full permit sets and working drawings &mdash; plans, elevations, sections, and schedules coordinated across disciplines.</p></div>
+      </div>
+      <div class="spec-item">
+        <span class="code">02</span>
+        <div><h3>Structural &amp; Detail Drafting</h3><p>Connection details, wall sections, and steel or concrete detailing built to fabrication-ready tolerances.</p></div>
+      </div>
+      <div class="spec-item">
+        <span class="code">03</span>
+        <div><h3>BIM Modeling &amp; Coordination</h3><p>Revit modeling with clash detection across architectural, structural, and MEP disciplines.</p></div>
+      </div>
+      <div class="spec-item">
+        <span class="code">04</span>
+        <div><h3>As-Built Surveys &amp; Redlines</h3><p>Field verification and fast markup turnaround so record drawings match what's actually built.</p></div>
+      </div>
+      <div class="spec-item">
+        <span class="code">05</span>
+        <div><h3>Millwork &amp; Shop Drawings</h3><p>Custom casework and fabrication drawings dimensioned for the shop floor, not just the design review.</p></div>
+      </div>
+      <div class="spec-item">
+        <span class="code">06</span>
+        <div><h3>Code &amp; Zoning Review</h3><p>Sheet-level compliance checks against local code and zoning before a set ever reaches plan review.</p></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<svg class="dim-divider on-light" viewBox="0 0 1180 46" preserveAspectRatio="none" aria-hidden="true">
+  <line x1="20" y1="23" x2="1160" y2="23" stroke-width="1"/>
+  <line x1="20" y1="14" x2="20" y2="32" stroke-width="1"/>
+  <line x1="1160" y1="14" x2="1160" y2="32" stroke-width="1"/>
+  <text x="590" y="18" text-anchor="middle">LEGEND &mdash; SHEET A&#8211;003</text>
+</svg>
+
+<section class="sheet on-light" id="tools">
+  <span class="sheet-tag">A&#8211;003</span>
+  <div class="wrap reveal">
+    <div class="section-head">
+      <p class="eyebrow">Sheet A&#8211;003 &mdash; Legend</p>
+      <h2>Software &amp; tools.</h2>
+      <p>The platforms behind every sheet, read the way a drawing legend reads a symbol.</p>
+    </div>
+    <div class="legend-grid">
+      <div class="legend-item">
+        <div class="legend-swatch"><svg width="18" height="18" viewBox="0 0 18 18"><rect x="1" y="1" width="16" height="16" fill="none" stroke="#1C2024" stroke-width="1"/><line x1="1" y1="9" x2="17" y2="9" stroke="#1C2024" stroke-width="1"/></svg></div>
+        <div class="legend-body">
+          <div class="legend-top"><span>AutoCAD</span><span>Expert</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:96%;"></div></div>
+        </div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-swatch"><svg width="18" height="18" viewBox="0 0 18 18"><rect x="1" y="5" width="16" height="12" fill="none" stroke="#1C2024" stroke-width="1"/><polyline points="1,5 9,1 17,5" fill="none" stroke="#1C2024" stroke-width="1"/></svg></div>
+        <div class="legend-body">
+          <div class="legend-top"><span>Revit</span><span>Expert</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:94%;"></div></div>
+        </div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-swatch"><svg width="18" height="18" viewBox="0 0 18 18"><rect x="2" y="2" width="10" height="10" fill="none" stroke="#1C2024" stroke-width="1"/><line x1="2" y1="16" x2="16" y2="2" stroke="#1C2024" stroke-width="1"/></svg></div>
+        <div class="legend-body">
+          <div class="legend-top"><span>SketchUp</span><span>Advanced</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:80%;"></div></div>
+        </div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-swatch"><svg width="18" height="18" viewBox="0 0 18 18"><path d="M1,15 L6,4 L11,12 L17,3" fill="none" stroke="#1C2024" stroke-width="1"/></svg></div>
+        <div class="legend-body">
+          <div class="legend-top"><span>Civil 3D</span><span>Intermediate</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:60%;"></div></div>
+        </div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-swatch"><svg width="18" height="18" viewBox="0 0 18 18"><rect x="1" y="1" width="16" height="16" fill="none" stroke="#1C2024" stroke-width="1"/><line x1="4" y1="9" x2="14" y2="9" stroke="#D9542E" stroke-width="1.4"/></svg></div>
+        <div class="legend-body">
+          <div class="legend-top"><span>Bluebeam Revu</span><span>Expert</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:92%;"></div></div>
+        </div>
+      </div>
+      <div class="legend-item">
+        <div class="legend-swatch"><svg width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="7.5" fill="none" stroke="#1C2024" stroke-width="1"/></svg></div>
+        <div class="legend-body">
+          <div class="legend-top"><span>Adobe Suite</span><span>Advanced</span></div>
+          <div class="bar-track"><div class="bar-fill" style="width:78%;"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<svg class="dim-divider on-light" viewBox="0 0 1180 46" preserveAspectRatio="none" aria-hidden="true">
+  <line x1="20" y1="23" x2="1160" y2="23" stroke-width="1"/>
+  <line x1="20" y1="14" x2="20" y2="32" stroke-width="1"/>
+  <line x1="1160" y1="14" x2="1160" y2="32" stroke-width="1"/>
+  <text x="590" y="18" text-anchor="middle">SELECTED WORK &mdash; SHEET A&#8211;004</text>
+</svg>
+
+<section class="sheet on-light" id="work" style="background:var(--paper-2);">
+  <span class="sheet-tag">A&#8211;004</span>
+  <div class="wrap reveal">
+    <div class="section-head">
+      <p class="eyebrow">Sheet A&#8211;004 &mdash; Selected Work</p>
+      <h2>Six sets, six scopes.</h2>
+      <p>Hover a sheet to trace the line work. Each project shown here was drafted or coordinated by Elias Vance in support of the architect or engineer of record.</p>
+    </div>
+
+    <div class="work-grid">
+      <div class="work-card">
+        <div class="work-thumb">
+          <svg viewBox="0 0 300 150" fill="none" stroke="#6FD6E0" stroke-width="1.2">
+            <line x1="20" y1="120" x2="280" y2="120"/>
+            <rect x="60" y="55" width="60" height="65"/>
+            <rect x="130" y="35" width="70" height="85"/>
+            <rect x="210" y="70" width="45" height="50"/>
+            <line x1="60" y1="70" x2="120" y2="70"/>
+            <line x1="130" y1="60" x2="200" y2="60"/>
+          </svg>
+        </div>
+        <div class="work-top"><span>Sheet A&#8211;101</span><span>Residential</span></div>
+        <h3>Maple Ridge Residence</h3>
+        <p>Full construction document set for a two-story single-family residence, from foundation plan through finish schedule.</p>
+        <div class="work-scale">Scale 1/4" = 1'-0"</div>
+      </div>
+
+      <div class="work-card">
+        <div class="work-thumb">
+          <svg viewBox="0 0 300 150" fill="none" stroke="#6FD6E0" stroke-width="1.2">
+            <line x1="150" y1="20" x2="150" y2="130"/>
+            <line x1="80" y1="55" x2="220" y2="55"/>
+            <line x1="80" y1="95" x2="220" y2="95"/>
+            <line x1="80" y1="20" x2="80" y2="130"/>
+            <line x1="220" y1="20" x2="220" y2="130"/>
+            <circle cx="150" cy="55" r="4"/>
+          </svg>
+        </div>
+        <div class="work-top"><span>Sheet A&#8211;102</span><span>Commercial</span></div>
+        <h3>Harbor View Office Tower</h3>
+        <p>Structural steel connection detailing for an eleven-story office tower, coordinated with the fabricator's shop drawings.</p>
+        <div class="work-scale">Scale 3" = 1'-0"</div>
+      </div>
+
+      <div class="work-card">
+        <div class="work-thumb">
+          <svg viewBox="0 0 300 150" fill="none" stroke="#6FD6E0" stroke-width="1.2">
+            <rect x="40" y="30" width="90" height="90"/>
+            <rect x="150" y="30" width="90" height="90"/>
+            <line x1="85" y1="30" x2="85" y2="120"/>
+            <line x1="195" y1="30" x2="195" y2="120"/>
+            <line x1="40" y1="75" x2="240" y2="75"/>
+          </svg>
+        </div>
+        <div class="work-top"><span>Sheet A&#8211;103</span><span>Multifamily</span></div>
+        <h3>Cedarline Apartments</h3>
+        <p>BIM coordination across four buildings, resolving structural and MEP clashes ahead of permit submission.</p>
+        <div class="work-scale">Scale 1/8" = 1'-0"</div>
+      </div>
+
+      <div class="work-card">
+        <div class="work-thumb">
+          <svg viewBox="0 0 300 150" fill="none" stroke="#6FD6E0" stroke-width="1.2">
+            <rect x="50" y="45" width="200" height="70"/>
+            <line x1="50" y1="70" x2="250" y2="70"/>
+            <line x1="90" y1="45" x2="90" y2="115"/>
+            <line x1="150" y1="45" x2="150" y2="115"/>
+            <line x1="210" y1="45" x2="210" y2="115"/>
+          </svg>
+        </div>
+        <div class="work-top"><span>Sheet A&#8211;104</span><span>Institutional</span></div>
+        <h3>Northside Elementary Addition</h3>
+        <p>Permit-ready addition set with full accessibility and zoning code review folded into the drawing package.</p>
+        <div class="work-scale">Scale 1/4" = 1'-0"</div>
+      </div>
+
+      <div class="work-card">
+        <div class="work-thumb">
+          <svg viewBox="0 0 300 150" fill="none" stroke="#6FD6E0" stroke-width="1.2">
+            <rect x="60" y="50" width="180" height="55"/>
+            <line x1="60" y1="65" x2="240" y2="65"/>
+            <line x1="60" y1="90" x2="240" y2="90"/>
+            <line x1="100" y1="50" x2="100" y2="105"/>
+            <line x1="200" y1="50" x2="200" y2="105"/>
+          </svg>
+        </div>
+        <div class="work-top"><span>Sheet A&#8211;105</span><span>Retail</span></div>
+        <h3>Ashgrove Retail Pavilion</h3>
+        <p>Custom millwork and fixture shop drawings dimensioned for direct fabrication, no secondary redline pass required.</p>
+        <div class="work-scale">Scale 1" = 1'-0"</div>
+      </div>
+
+      <div class="work-card">
+        <div class="work-thumb">
+          <svg viewBox="0 0 300 150" fill="none" stroke="#6FD6E0" stroke-width="1.2">
+            <path d="M30,110 C90,60 210,60 270,110"/>
+            <line x1="30" y1="110" x2="30" y2="130"/>
+            <line x1="270" y1="110" x2="270" y2="130"/>
+            <line x1="60" y1="90" x2="60" y2="130"/>
+            <line x1="240" y1="90" x2="240" y2="130"/>
+          </svg>
+        </div>
+        <div class="work-top"><span>Sheet A&#8211;106</span><span>Civil / Landscape</span></div>
+        <h3>Kessler Bridge Overlook</h3>
+        <p>Field-verified as-built survey and redline set delivered on a compressed two-week turnaround.</p>
+        <div class="work-scale">Scale 1" = 20'-0"</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<svg class="dim-divider on-dark" viewBox="0 0 1180 46" preserveAspectRatio="none" aria-hidden="true">
+  <line x1="20" y1="23" x2="1160" y2="23" stroke-width="1"/>
+  <line x1="20" y1="14" x2="20" y2="32" stroke-width="1"/>
+  <line x1="1160" y1="14" x2="1160" y2="32" stroke-width="1"/>
+  <text x="590" y="18" text-anchor="middle">PROCESS &mdash; SHEET A&#8211;005</text>
+</svg>
+
+<section class="sheet on-dark" id="process" style="background:var(--blue);">
+  <span class="sheet-tag">A&#8211;005</span>
+  <div class="wrap reveal">
+    <div class="section-head">
+      <p class="eyebrow">Sheet A&#8211;005 &mdash; Process</p>
+      <h2>From sketch to issued set.</h2>
+      <p>The same five-step sequence runs through every project, scaled to the size of the scope.</p>
+    </div>
+    <div class="process-list">
+      <div class="process-item"><span class="process-num">01</span><div><h3>Intake &amp; Redlines</h3><p>Receive concept sketches, architect markups, or field notes and confirm scope, scale, and deliverable format.</p></div></div>
+      <div class="process-item"><span class="process-num">02</span><div><h3>Modeling</h3><p>Build the base model or drawing in Revit or AutoCAD at true scale, structured for the sheets to come.</p></div></div>
+      <div class="process-item"><span class="process-num">03</span><div><h3>Detailing &amp; Coordination</h3><p>Resolve conflicts across disciplines, add dimensions and annotation, and detail every assembly called out.</p></div></div>
+      <div class="process-item"><span class="process-num">04</span><div><h3>QA Check-Set</h3><p>Plot and hand-check every sheet against the specification before anything is marked ready to issue.</p></div></div>
+      <div class="process-item"><span class="process-num">05</span><div><h3>Issue &amp; Revise</h3><p>Deliver a stamped-ready set and track revisions cleanly through permit review and RFI cycles.</p></div></div>
+    </div>
+  </div>
+</section>
+
+<svg class="dim-divider on-light" viewBox="0 0 1180 46" preserveAspectRatio="none" aria-hidden="true">
+  <line x1="20" y1="23" x2="1160" y2="23" stroke-width="1"/>
+  <line x1="20" y1="14" x2="20" y2="32" stroke-width="1"/>
+  <line x1="1160" y1="14" x2="1160" y2="32" stroke-width="1"/>
+  <text x="590" y="18" text-anchor="middle">CLIENT NOTES &mdash; SHEET A&#8211;006</text>
+</svg>
+
+<section class="sheet on-light" id="notes">
+  <span class="sheet-tag">A&#8211;006</span>
+  <div class="wrap reveal">
+    <div class="section-head">
+      <p class="eyebrow">Sheet A&#8211;006 &mdash; Client Notes</p>
+      <h2>Marked up in the margins.</h2>
+    </div>
+    <div class="notes-grid">
+      <div class="note-card">
+        <span class="mark">Note 01</span>
+        <p class="quote">"Elias catches the details our own reviewers miss. Redlines come back clean and coordinated every time."</p>
+        <p class="attr">Principal, Bergman Architecture Group</p>
+      </div>
+      <div class="note-card">
+        <span class="mark">Note 02</span>
+        <p class="quote">"Our steel package went through fabrication with zero detailing RFIs. That never happens."</p>
+        <p class="attr">Project Engineer, Torrance Structural</p>
+      </div>
+      <div class="note-card">
+        <span class="mark">Note 03</span>
+        <p class="quote">"Turnaround on as-builts was faster than we get from in-house staff, and the line quality was better."</p>
+        <p class="attr">Owner, Kessler Civil Partners</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<svg class="dim-divider on-dark" viewBox="0 0 1180 46" preserveAspectRatio="none" aria-hidden="true">
+  <line x1="20" y1="23" x2="1160" y2="23" stroke-width="1"/>
+  <line x1="20" y1="14" x2="20" y2="32" stroke-width="1"/>
+  <line x1="1160" y1="14" x2="1160" y2="32" stroke-width="1"/>
+  <text x="590" y="18" text-anchor="middle">SUBMITTAL &mdash; SHEET A&#8211;007</text>
+</svg>
+
+<section class="sheet on-dark" id="contact" style="background:var(--blue-deep);">
+  <span class="sheet-tag">A&#8211;007</span>
+  <div class="wrap reveal">
+    <div class="contact-grid">
+      <div class="contact-info">
+        <p class="eyebrow">Sheet A&#8211;007 &mdash; Submittal</p>
+        <h2 style="margin-top:16px;font-size:clamp(1.9rem,3.4vw,2.5rem);">Request a submittal.</h2>
+        <p style="margin-top:18px;">Send over your drawing set, sketch, or scope and get a turnaround estimate back within two business days.</p>
+        <div class="info-row"><span>Email</span><span>drafting@eliasvance.com</span></div>
+        <div class="info-row"><span>Phone</span><span>+1 (206) 555-0148</span></div>
+        <div class="info-row"><span>Based in</span><span>Seattle, WA &mdash; remote worldwide</span></div>
+        <div class="stamp">For Review</div>
+      </div>
+      <form onsubmit="event.preventDefault(); this.reset(); document.getElementById('formSent').style.display='block';">
+        <div class="field">
+          <label for="f-name">Name</label>
+          <input id="f-name" type="text" placeholder="Your name" required>
+        </div>
+        <div class="field">
+          <label for="f-firm">Firm</label>
+          <input id="f-firm" type="text" placeholder="Company or studio">
+        </div>
+        <div class="field">
+          <label for="f-type">Project type</label>
+          <select id="f-type">
+            <option>Residential</option>
+            <option>Commercial</option>
+            <option>Structural detailing</option>
+            <option>BIM coordination</option>
+            <option>As-built survey</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="f-msg">Scope notes</label>
+          <textarea id="f-msg" placeholder="Sheet count, deadline, format needed"></textarea>
+        </div>
+        <button type="submit" class="btn btn--fill">Submit for Review</button>
+        <p class="form-note" id="formSent" style="display:none;">Submitted &mdash; you'll hear back within two business days.</p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="footer-top">
+      <ul class="sheet-index">
+        <li><span>A&#8211;000</span><a href="#cover">Cover</a></li>
+        <li><span>A&#8211;001</span><a href="#profile">Profile</a></li>
+        <li><span>A&#8211;002</span><a href="#services">Scope of Services</a></li>
+        <li><span>A&#8211;003</span><a href="#tools">Legend</a></li>
+        <li><span>A&#8211;004</span><a href="#work">Selected Work</a></li>
+        <li><span>A&#8211;005</span><a href="#process">Process</a></li>
+        <li><span>A&#8211;006</span><a href="#notes">Client Notes</a></li>
+        <li><span>A&#8211;007</span><a href="#contact">Submittal</a></li>
+      </ul>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; 2026 Elias Vance Drafting</span>
+      <span>Sheet Set &mdash; Rev 03 &mdash; Not for Construction</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  // CAD-style coordinate readout in hero
+  const hero = document.getElementById('cover');
+  const cx = document.getElementById('cx');
+  const cy = document.getElementById('cy');
+  const crosshair = document.getElementById('crosshair');
+  if (hero && cx && cy) {
+    hero.addEventListener('mousemove', function(e){
+      const r = hero.getBoundingClientRect();
+      const x = ((e.clientX - r.left) / 10).toFixed(1);
+      const y = ((r.bottom - e.clientY) / 10).toFixed(1);
+      cx.textContent = x.padStart(5,'0');
+      cy.textContent = y.padStart(5,'0');
+      crosshair.style.opacity = '1';
+      crosshair.style.left = (e.clientX - r.left) + 'px';
+      crosshair.style.top = (e.clientY - r.top) + 'px';
+    });
+    hero.addEventListener('mouseleave', function(){
+      crosshair.style.opacity = '0';
+    });
+  }
+
+  // scroll reveal
+  const revealEls = document.querySelectorAll('.reveal');
+  if ('IntersectionObserver' in window) {
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-visible');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+    revealEls.forEach(el => io.observe(el));
+  } else {
+    revealEls.forEach(el => el.classList.add('is-visible'));
+  }
+
+  // close mobile nav on link click
+  document.querySelectorAll('nav a').forEach(a => {
+    a.addEventListener('click', () => {
+      const t = document.getElementById('nav-toggle');
+      if (t) t.checked = false;
+    });
+  });
+</script>
+
+</body>
+</html>
